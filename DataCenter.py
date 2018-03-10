@@ -12,6 +12,7 @@ import webbrowser
 import threading
 import shutil
 import time
+import os
 
 # 设置
 # setting
@@ -19,7 +20,7 @@ import time
 HANDLE = "";
 PASSWORD = "";
 PDFCONFIG = pdfkit.configuration(wkhtmltopdf=b"d:/wkhtmltopdf/bin/wkhtmltopdf.exe")
-DEBUG = 0;
+DEBUG = 1;
 POOL_SIZE_LIMIT = 20;
 CF_MAX_PROBLEMPAGE = 32;
 
@@ -120,13 +121,14 @@ def login():
         print(DataCenter.BFAA);
 
 def load_banlist():
-    banfile = open(BANLIST_FILE, "r+")  
+    banfile = open(BANLIST_FILE, "r+")
     banlines = banfile.readlines();
     DataCenter.BANLIST = [];
     for line in banlines:
         DataCenter.BANLIST.append(line.strip());
     if DataCenter.DEBUG:
         print(DataCenter.BANLIST);
+    banfile.close();
 
 def load_problemlist():
     problemfile = open(PROBLEMLIST_FILE, "r+")  
@@ -136,6 +138,7 @@ def load_problemlist():
         DataCenter.PROBLEMLIST.append(line.strip());
     if DataCenter.DEBUG:
         print(DataCenter.PROBLEMLIST);
+    problemfile.close();
         
 def save_banlist():
     banfile = open(BANLIST_FILE, "w+")  
@@ -144,6 +147,7 @@ def save_banlist():
         banfile.write("\n");
     if DataCenter.DEBUG:
         print(DataCenter.BANLIST);
+    banfile.close();
         
 def save_problemlist():
     problemfile = open(PROBLEMLIST_FILE, "w+")  
@@ -152,6 +156,7 @@ def save_problemlist():
         problemfile.write("\n");
     if DataCenter.DEBUG:
         print(DataCenter.PROBLEMLIST);
+    problemfile.close();
 
 def main():
     try:
@@ -159,6 +164,24 @@ def main():
     except Exception as e:
         if(DataCenter.DEBUG):
             print(e);
+            
+    if not os.path.exists("problemset"):
+        os.mkdir("problemset");
+    if not os.path.exists("data"):
+        os.mkdir("data");
+    if not os.path.exists("test"):
+        os.mkdir("test");
+    if not os.path.exists("code"):
+        os.mkdir("code");
+        
+    banfile = open(BANLIST_FILE, "w+")  
+    banfile.write('');
+    banfile.close();
+
+    problemfile = open(PROBLEMLIST_FILE, "w+")  
+    problemfile.write('');
+    problemfile.close();
+    
     load_banlist();
     load_problemlist();
     
@@ -176,6 +199,8 @@ class PdfDownloader(threading.Thread):
             if (DataCenter.POOL_SIZE_NOW < DataCenter.POOL_SIZE_LIMIT):
                 DataCenter.POOL_SIZE_NOW += 1;
                 DataCenter.pdfdownload(self.url , self.path);
+                if not os.exist("problemset"):
+                    os.mkdir("problemset");
                 shutil.move(self.path, "problemset/")
                 DataCenter.POOL_SIZE_NOW -= 1;
                 break;

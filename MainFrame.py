@@ -83,12 +83,16 @@ class MainFrame(tkinter.Frame):
        
     
     def save(self):
+        if not os.path.exists("code"):
+            os.mkdir("code");
         problem_index = self.text_dialog.curselection();
         problem_id = self.text_dialog.get(problem_index);
         f = open("code/" + problem_id + ".txt", "w");
         f.write(self.text_input.get(0.0, tkinter.END));
     
     def show(self):
+        if not os.path.exists("code"):
+            os.mkdir("code");
 #         pdfconfig = pdfkit.configuration(wkhtmltopdf=b"d:/wkhtmltopdf/bin/wkhtmltopdf.exe")
         problem_index = self.text_dialog.curselection();
         problem_id = self.text_dialog.get(problem_index);
@@ -103,6 +107,10 @@ class MainFrame(tkinter.Frame):
             
         problem_path = problem_id + ".pdf"
         problem_path = problem_path.strip();
+        if(DataCenter.DEBUG):
+            print(problem_id);
+            print(problem_path);
+            
         self.download(problem_id);
         webbrowser.open(os.path.split(os.path.realpath(__file__))[0] + "/problemset/" + problem_path)
         
@@ -144,7 +152,7 @@ class MainFrame(tkinter.Frame):
         DataCenter.save_problemlist();
         
     def drag(self):
-        lstr = r'''<tr >'''
+        lstr = r'''<a href="/problemset/problem/'''
         rstr = r'''</a>'''
 #         pattern = re.compile(r'''()([.])*()''')
         dragnum = int(self.text_dragnum.get(0.0, tkinter.END));
@@ -174,8 +182,15 @@ class MainFrame(tkinter.Frame):
 #                 nowcnt += match.groups().size();
             
             res = DataCenter.all_txt_wrap_by(lstr, rstr, html_str);
-            for au in res:
-                au = au.split()[-1];
+            for au in res:  
+                tmps = "";
+                i = 0;
+                while(au[i] != "/"):
+                    tmps += au[i];
+                    i += 1;
+                i += 1;
+                tmps += au[i];
+                au = tmps;
                 if(au in DataCenter.BANLIST):
                     continue;
                 if(au in DataCenter.PROBLEMLIST):

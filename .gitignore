@@ -1,0 +1,7 @@
+/code
+/data
+/problemset
+/test
+/__pycache__
+*.bak
+problemset.rar
